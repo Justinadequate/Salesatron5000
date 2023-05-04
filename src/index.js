@@ -129,13 +129,20 @@ async function handleScheduling(message) {
 }
 
 app.message(async ({ message, say }) => {
+  console.log('LLLLLLLLLLLl');
   console.log(message);
 
-  if(await handleScheduling(message.text)) {
-    // respond
-    say("I'm on it!  I'll schedule that for you.");
+  try {
+    const messageSent = await handleScheduling(message.text);
+    if(messageSent) {
+      // respond
+      console.log('responding')
+      say("I'm on it!  I'll schedule that for you.");
+    }
+    console.log('responded, maybe')
+  } catch (e) {
+    console.log('COULDN"T Send msag', e)
   }
-
 });
 
 (async () => {

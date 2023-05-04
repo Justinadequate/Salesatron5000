@@ -112,18 +112,19 @@ const app = new App({
 });
 
 async function handleScheduling(message) {
-  var groomedMessage = groomMessage(message);
-  let matches = [...groomedMessage.matchAll(regex)];
-  var dateTimeInfo = getDateTimeInfoFromRegex(matches);
 
   if( message.indexOf('schedule') > -1){
     return true;
   }
 
+  var groomedMessage = groomMessage(message);
+  let matches = [...groomedMessage.matchAll(regex)];
+  var dateTimeInfo = getDateTimeInfoFromRegex(matches);
+
   return false;
 }
 
-app.message(regex, async ({ message, say }) => {
+app.message(async ({ message, say }) => {
   console.log(message);
 
   if(await handleScheduling(message.text)) {

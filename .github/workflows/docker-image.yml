@@ -22,7 +22,10 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Push the Docker image
-      run: |
-        docker build . -t ghcr.io/justinadequate/salesatron5000:latest -t ghcr.io/justinadequate/salesatron5000:$(date +%s)
-        docker push ghcr.io/justinadequate/salesatron5000:latest
+    - name: Build and Push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: |
+          ghcr.io/justinadequate/salesatron5000:latest

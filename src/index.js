@@ -126,7 +126,7 @@ async function handleScheduling(message) {
 app.message(regex, async ({ message, say }) => {
   console.log(message);
 
-  if(await handleScheduling(message)) {
+  if(await handleScheduling(message.text)) {
     // respond
     say("I'm on it!  I'll schedule that for you.");
   }

@@ -125,11 +125,25 @@ async function handleScheduling(message) {
       dateTimeInfo.year,
       months[dateTimeInfo.month],
       dateTimeInfo.day.replace('th', '').replace('rd', '').replace('nd', ''),
-      dateTimeInfo.hour + amPmOffset[dateTimeInfo.amPm],
+      parseInt(dateTimeInfo.hour) + (amPmOffset[dateTimeInfo.amPm] || 0),
       dateTimeInfo.minute
     );
-    console.log(date.toString());
-    return true;
+
+    // Host is in CDT
+    let time = date.getTime();
+
+    // We want to display in EDT, so remove an hour
+    time = time - (1000*60*60*1) // remove an hour 
+
+    let timeEst = new Date(time) ;
+
+    console.log('LLLLLLLLLLLl');
+    console.log(timeEst.toLocaleTimeString());
+    console.log(timeEst.toLocaleDateString());
+    console.log(timeEst.toTimeString());
+    console.log(timeEst.toUTCString());
+    console.log('LLLLLLLLLLLl');
+    return timeEst.toTimeString();
   }
   console.log('NO FIND TIME', matches);
 
@@ -137,15 +151,12 @@ async function handleScheduling(message) {
 }
 
 app.message(async ({ message, say }) => {
-  console.log('LLLLLLLLLLLl');
-  console.log(message);
-
   try {
     const messageSent = await handleScheduling(message.text);
-    if(messageSent) {
+    if(messageSent !== false) {
       // respond
       console.log('responding')
-      say("I'm on it!  I'll schedule that for you.");
+      say(`I'm on it!  I'll schedule that for you at ${messageSent}`);
     }
     console.log('responded, maybe')
   } catch (e) {
@@ -172,6 +183,7 @@ let groomMessage = (message) => {
 }
 
 let getDateTimeInfoFromRegex = (matches) => {
+  console.log(matches)
   return {
     day: matches[0].groups.Day ?? matches[0].groups.Day2,
     month: matches[0].groups.Month ?? matches[0].groups.Month2,
@@ -180,7 +192,7 @@ let getDateTimeInfoFromRegex = (matches) => {
     	:new Date().getFullYear(),
     hour: matches[1]?.groups.Hour ?? 0,
     minute: matches[1]?.groups.Minute ?? 0,
-    amPm: matches[1]?.groups.AmPm
+    amPm: matches[1]?.groups.AmPm 
   }
 }
 

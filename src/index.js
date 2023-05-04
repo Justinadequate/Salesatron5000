@@ -7,7 +7,7 @@ const app = new App({
 
 app.message(async ({message, say}) => {
   console.log(message);
-  say('I GOT YO MESSAGE');
+  say('I GOT YO MESSAGE?');
 });
 
 (async () => {

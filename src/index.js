@@ -111,12 +111,25 @@ const app = new App({
   // appToken: process.env.SLACK_APP_TOKEN,
 });
 
-app.message(regex, async ({ message, say }) => {
-  console.log(message);
-
+async function handleScheduling(message) {
   var groomedMessage = groomMessage(message);
   let matches = [...groomedMessage.matchAll(regex)];
   var dateTimeInfo = getDateTimeInfoFromRegex(matches);
+
+  if( message.indexOf('schedule') > -1){
+    return true;
+  }
+
+  return false;
+}
+
+app.message(regex, async ({ message, say }) => {
+  console.log(message);
+
+  if(await handleScheduling(message)) {
+    // respond
+    say("I'm on it!  I'll schedule that for you.");
+  }
 
   console.log(dateTimeInfo);
 });

@@ -117,10 +117,18 @@ async function handleScheduling(message) {
 
   var groomedMessage = groomMessage(message);
   let matches = [...groomedMessage.matchAll(regex)];
-  var dateTimeInfo = getDateTimeInfoFromRegex(matches);
 
   if (matches.length > 0) {
+    var dateTimeInfo = getDateTimeInfoFromRegex(matches);
     console.log(dateTimeInfo);
+    var date = new Date(
+      dateTimeInfo.year,
+      months[dateTimeInfo.month],
+      dateTimeInfo.day.replace('th', '').replace('rd', '').replace('nd', ''),
+      dateTimeInfo.hour + amPmOffset[dateTimeInfo.amPm],
+      dateTimeInfo.minute
+    );
+    console.log(date.toString());
     return true;
   }
   console.log('NO FIND TIME', matches);
@@ -167,9 +175,42 @@ let getDateTimeInfoFromRegex = (matches) => {
   return {
     day: matches[0].groups.Day ?? matches[0].groups.Day2,
     month: matches[0].groups.Month ?? matches[0].groups.Month2,
-    year: matches[0].groups.Year ?? matches[0].groups.Year2 ?? Date().getFullYear(),
-    hour: matches[1].groups.Hour,
-    minute: matches[1].groups.Minute,
-    amPm: matches[1].groups.AmPm
+    year: matches[0].groups.Year ?? matches[0].groups.Year2.trim().length === 0
+    	?matches[0].groups.Year2
+    	:new Date().getFullYear(),
+    hour: matches[1]?.groups.Hour ?? 0,
+    minute: matches[1]?.groups.Minute ?? 0,
+    amPm: matches[1]?.groups.AmPm
   }
+}
+
+const months = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+  1: 0,
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 5,
+  7: 6,
+  8: 7,
+  9: 8,
+  10: 9,
+  11: 10,
+  12: 11
+}
+const amPmOffset = {
+	am: 0,
+  pm: 12
 }

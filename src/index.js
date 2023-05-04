@@ -76,14 +76,18 @@ async function authorize() {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 async function listEvents(auth) {
-  const calendar = google.calendar({ version: "v3", auth });
-  const res = await calendar.calendars.get({
-    calendarId: "c_f4bad3838ed561bf803618c1fa21c36bee072eba934ef29b3fb12e80ec2aec17@group.calendar.google.com",
+  const calendarApi = google.calendar({ version: "v3", auth });
+  const calendarId = "c_f4bad3838ed561bf803618c1fa21c36bee072eba934ef29b3fb12e80ec2aec17@group.calendar.google.com";
+  
+  // Create calendar
+  
+  const res = await calendarApi.calendars.get({
+    calendarId: calendarId,
   });
   console.log(res.data);
 
-  const ires = await calendar.events.insert({
-    calendarId: "c_f4bad3838ed561bf803618c1fa21c36bee072eba934ef29b3fb12e80ec2aec17@group.calendar.google.com",
+  const ires = await calendarApi.events.insert({
+    calendarId: calendarId,
     requestBody: {
       summary: "SALES DEMO",
       description: "Yo!  A demo is happening",

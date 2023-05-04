@@ -88,38 +88,42 @@ async function listEvents(auth) {
   });
   console.log(res.data);
 
-  const ires = await calendarApi.events.insert({
-    calendarId: calendarId,
-    requestBody: {
-      summary: "SALES DEMO",
-      description: "Yo!  A demo is happening",
-      start: {
-        dateTime: "2023-05-04T05:00:00-06:00",
-      },
-      end: {
-        dateTime: "2023-05-04T06:00:00-06:00",
-      },
-    },
-  });
+  // const ires = await calendarApi.events.insert({
+  //   calendarId: calendarId,
+  //   requestBody: {
+  //     summary: "SALES DEMO",
+  //     description: "Yo!  A demo is happening",
+  //     start: {
+  //       dateTime: "2023-05-04T05:00:00-06:00",
+  //     },
+  //     end: {
+  //       dateTime: "2023-05-04T06:00:00-06:00",
+  //     },
+  //   },
+  // });
 }
 
 const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   token: process.env.SLACK_BOT_TOKEN,
   logLevel: "INFO",
-  // socketMode: true,
-  // appToken: process.env.SLACK_APP_TOKEN,
 });
 
 async function handleScheduling(message) {
 
-  if( message.indexOf('schedule') > -1){
-    return true;
-  }
+  // if( message.indexOf('schedule') > -1){
+  //   return true;
+  // }
 
   var groomedMessage = groomMessage(message);
   let matches = [...groomedMessage.matchAll(regex)];
   var dateTimeInfo = getDateTimeInfoFromRegex(matches);
+
+  if (matches.length > 0) {
+    console.log(dateTimeInfo);
+    return true;
+  }
+  console.log('NO FIND TIME', matches);
 
   return false;
 }
@@ -132,13 +136,12 @@ app.message(async ({ message, say }) => {
     say("I'm on it!  I'll schedule that for you.");
   }
 
-  console.log(dateTimeInfo);
 });
 
 (async () => {
   // Start the app
   try {
-    await app.start(process.env.PORT || 3001);
+    await app.start(process.env.PORT || 3000);
     const auth = await authorize();
     listEvents(auth);
   } catch (e) {

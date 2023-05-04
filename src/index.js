@@ -6,6 +6,8 @@ const path = require("path");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google } = require("googleapis");
 
+const regex = /\b(?<Month>\d{1,2})[-/](?<Day>\d{1,2})[-/]?(?<Year>\d{0,4})\b|\b(?<Month2>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[.,]?\s+(?<Day2>\d{1,2}[a-z]{0,2}),?\s+(?<Year2>\d{0,4})\b|\b(?<Hour>1[012]|[1-9])(?!\/)(?!:(?=1(?!\s)))(?::(?<Minute>\d{2}))?\s?(?<AmPm>am|pm|AM|PM)?\b/gm;
+
 // If modifying these scopes, delete token.json.
 const SCOPES = [
   "https://www.googleapis.com/auth/calendar",
@@ -109,9 +111,14 @@ const app = new App({
   // appToken: process.env.SLACK_APP_TOKEN,
 });
 
-app.message(async ({ message, say }) => {
+app.message(regex, async ({ message, say }) => {
   console.log(message);
-  say("I GOT YO MESSAGE?");
+
+  var groomedMessage = groomMessage(message);
+  let matches = [...groomedMessage.matchAll(regex)];
+  var dateTimeInfo = getDateTimeInfoFromRegex(matches);
+
+  console.log(dateTimeInfo);
 });
 
 (async () => {
@@ -126,3 +133,19 @@ app.message(async ({ message, say }) => {
 
   console.log("⚡️ Bolt app is running!");
 })();
+
+let groomMessage = (message) => {
+  message.replace(' 1:1 ', ' ');
+  return message
+}
+
+let getDateTimeInfoFromRegex = (matches) => {
+  return {
+    day: matches[0].groups.Day ?? matches[0].groups.Day2,
+    month: matches[0].groups.Month ?? matches[0].groups.Month2,
+    year: matches[0].groups.Year ?? matches[0].groups.Year2 ?? Date().getFullYear(),
+    hour: matches[1].groups.Hour,
+    minute: matches[1].groups.Minute,
+    amPm: matches[1].groups.AmPm
+  }
+}

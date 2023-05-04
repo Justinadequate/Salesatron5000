@@ -1,0 +1,29 @@
+{
+  "name": "salesatron5000",
+  "version": "1.0.0",
+  "description": "A slackbot for managing sales calendars",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Justinadequate/Salesatron5000.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Justinadequate/Salesatron5000/issues"
+  },
+  "homepage": "https://github.com/Justinadequate/Salesatron5000#readme",
+  "dependencies": {
+    "@slack/bolt": "^3.13.1",
+    "@slack/events-api": "^3.0.1",
+    "@slack/interactive-messages": "^2.0.2",
+    "@slack/oauth": "^2.6.1",
+    "@slack/rtm-api": "^6.1.0",
+    "@slack/web-api": "^6.8.1",
+    "dotenv": "^16.0.3",
+    "googleapis": "^118.0.0"
+  }
+}

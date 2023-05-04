@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Justinadequate/Salesatron5000#readme",
   "dependencies": {
+    "@slack/events-api": "^3.0.1",
     "@slack/interactive-messages": "^2.0.2",
     "@slack/oauth": "^2.6.1",
     "@slack/rtm-api": "^6.1.0",

@@ -29,4 +29,3 @@ jobs:
         push: true
         tags: |
           ghcr.io/justinadequate/salesatron5000:latest
-          ghcr.io/justinadequate/salesatron5000:$(date +%s)

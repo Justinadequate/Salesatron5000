@@ -1,0 +1,16 @@
+
+version: "3"
+services:
+  slackbot:
+    image: ghcr.io/justinadequate/salesatron5000
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 60 --cleanup
+
+    

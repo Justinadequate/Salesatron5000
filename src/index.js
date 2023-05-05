@@ -60,7 +60,25 @@ app.message(async ({ message, say }) => {
   try {
     const msg = await handleScheduling(message.text);
     if (msg !== false) {
-      say(`I'm on it!  I'll schedule that for you at ${msg}`);
+
+      // reply to message, in thread only to the user
+      await app.client.chat.postMessage({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        text: `I'm on it!  I'll schedule that for you at ${msg}`,
+        thread_ts: message.thread_ts ?? message.ts,
+        reply_broadcast: false,
+      });
+
+      await say(`I'm on it!  I'll schedule that for you at ${msg}`);
+
+      // react to message
+      await app.client.reactions.add({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        name: "meow_business",
+        timestamp: message.ts,
+      });
     }
   } catch (e) {
     say('Something when wrong when making calendar.')

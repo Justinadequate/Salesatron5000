@@ -61,13 +61,19 @@ app.message(async ({ message, say }) => {
     const msg = await handleScheduling(message.text);
     if (msg !== false) {
 
-      // reply to message, in thread only to the user
-      await app.client.chat.postMessage({
+      // get message permalink
+      const permalink = await app.client.chat.getPermalink({
         token: process.env.SLACK_BOT_TOKEN,
         channel: message.channel,
-        text: `I'm on it!  I'll schedule that for you at ${msg}`,
-        thread_ts: message.thread_ts ?? message.ts,
-        reply_broadcast: false,
+        message_ts: message.ts,
+      });
+
+      // reply to message, in thread only to the user
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: message.channel,
+        text: `I'm on it!  I'll schedule that for you at ${msg} ${permalink.permalink}`,
+        //thread_ts: message.thread_ts ?? message.ts,
       });
 
       await say(`I'm on it!  I'll schedule that for you at ${msg}`);

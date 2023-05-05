@@ -1,34 +1,22 @@
+const { DateTime } = require('luxon');
+
 const DATE_TIME_REGEX = /\b(?<Month>\d{1,2})[-/](?<Day>\d{1,2})[-/]?(?<Year>\d{0,4})\b|\b(?<Month2>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[.,]?\s+(?<Day2>\d{1,2}[a-z]{0,2}),?\s+(?<Year2>\d{0,4})\b|\b(?<Hour>1[012]|[1-9])(?!\/)(?!:(?=1(?!\s)))(?::(?<Minute>\d{2}))?\s?(?<AmPm>am|pm|AM|PM)?\b/gm;
 
 function extractDate(message) {
-  var groomedMessage = groomMessage(message);
-  let matches = [...groomedMessage.matchAll(DATE_TIME_REGEX)];
+  const groomedMessage = groomMessage(message);
+  const matches = [...groomedMessage.matchAll(DATE_TIME_REGEX)];
 
   if (matches.length > 0) {
-    var dateTimeInfo = getDateTimeInfoFromRegex(matches);
-    var date = new Date(
-      dateTimeInfo.year,
-      months[dateTimeInfo.month],
-      dateTimeInfo.day.replace("th", "").replace("rd", "").replace("nd", ""),
-      parseInt(dateTimeInfo.hour) + (amPmOffset[dateTimeInfo.amPm] || 0),
-      dateTimeInfo.minute
-    );
+    const dateTimeInfo = getDateTimeInfoFromRegex(matches);
+    let dt = DateTime.fromObject({
+      year: dateTimeInfo.year,
+      month: dateTimeInfo.month,
+      day: dateTimeInfo.day.replace("th", "").replace("rd", "").replace("nd", ""), 
+      hour: dateTimeInfo.hour,
+      minute: dateTimeInfo.minute,
+    }, {zone: 'America/New_York'});
 
-    // Host is in CDT
-    let time = date.getTime();
-
-    // We want to display in EDT, so remove an hour
-    time = time - 1000 * 60 * 60 * 1; // remove an hour
-
-    let timeEst = new Date(time);
-
-    console.log("LLLLLLLLLLLl");
-    console.log(timeEst.toLocaleTimeString());
-    console.log(timeEst.toLocaleDateString());
-    console.log(timeEst.toTimeString());
-    console.log(timeEst.toUTCString());
-    console.log("LLLLLLLLLLLl");
-    return timeEst.toTimeString();
+    return dt
   }
 
   console.log('NO FIND TIME', matches);

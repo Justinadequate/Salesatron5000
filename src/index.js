@@ -3,7 +3,7 @@ const { App } = require("@slack/bolt");
 const { google } = require("googleapis");
 const { DateTime } = require('luxon');
 
-const extractDate = require("./date-extract");
+const { extractDate } = require("./date-extract");
 const authorize = require("./auth");
 
 

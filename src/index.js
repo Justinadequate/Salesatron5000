@@ -85,7 +85,7 @@ async function handleScheduling(message) {
     calendarId: calendarId,
     requestBody: {
       summary: "SALES DEMO",
-      description: `Yo!  A demo is happening.\n${message.text}\n${permalink.permalink}`,
+      description: `${message.text}\n${permalink.permalink}`,
       start: {
         dateTime: date.toISO(),
       },
@@ -146,10 +146,22 @@ app.command("/demos", async ({ command, ack, say }) => {
 
   let blocks = [
       {
+        "type": "header",
+        "text": {
+          "type": "plain_text",
+          "text": "Upcoming Demos"
+        }
+      },
+      {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": "*Upcoming Demos*"
+          "text": "Here are the upcoming demos."
+        },
+        "accessory": {
+          "type": "image",
+          "image_url": "https://api.slack.com/img/blocks/bkb_template_images/notifications.png",
+          "alt_text": "calendar thumbnail"
         }
       },
       {

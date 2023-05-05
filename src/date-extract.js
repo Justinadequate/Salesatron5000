@@ -7,6 +7,7 @@ function extractDate(message) {
   const groomedMessage = groomMessage(message);
   const matches = [...groomedMessage.matchAll(DATE_TIME_REGEX)];
 
+  // console.log(matches)
   if (matches.length > 0) {
     const dateTimeInfo = getDateTimeInfoFromRegex(matches);
 
@@ -21,7 +22,6 @@ function extractDate(message) {
       { zone: "America/New_York" }
     );
 
-    console.log(dt.toLocaleString(DateTime.DATETIME_FULL))
     return dt;
   }
 
@@ -57,10 +57,18 @@ const getDateTimeInfoFromRegex = (matches) => {
   let month = DateTime.local().month;
   let strMonth = matches[0].groups.Month ?? matches[0].groups.Month2 
   if (strMonth) {
+    console.log({strMonth})
+    try {
+      month = parseInt(strMonth)
+    } catch(e) {
+      console.log('Month not a strin')
+    }
     const index = monthLookup.indexOf(strMonth.toLowerCase().substring(0, 3));
+    console.log({index})
     if (index >= 0) {
       month = index + 1;
     } 
+    console.log({month})
   }
 
   return {

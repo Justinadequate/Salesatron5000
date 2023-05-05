@@ -43,6 +43,7 @@ async function listEvents(auth) {
       return {
         start: start,
         description: event.description,
+        permaLink: event.htmlLink,
       };
     });
   }
@@ -143,15 +144,66 @@ app.command("/demos", async ({ command, ack, say }) => {
   
   await ack();
 
+  let blocks = [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*Upcoming Demos*"
+        }
+      },
+      {
+        "type": "divider"
+      }
+  ];
+
+  // add events as sections
   const upcomingEvents = await listEvents(await authorize());
+  console.log(upcomingEvents);
   if (upcomingEvents.length > 0) {
-    await say("Here are the upcoming demos:");
     upcomingEvents.forEach((event) => {
-      say(`${event.start} - ${event.description}`);
+      const startTime = DateTime.fromISO(event.start).toLocaleString(DateTime.DATE_FULL);
+      blocks.push({
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": `*${startTime}* - ${event.description}`
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "emoji": true,
+            "text": "Event Link",
+          },
+          "value": "click_me_123",
+          "url": event.permaLink,
+          "action_id": "button-action"
+        }
+      });
     });
   } else {
-    await say("There are no upcoming demos.");
+    blocks.push({
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "There are no upcoming demos."
+      }
+    });
   }
+
+  await app.client.chat.postEphemeral({
+    token: process.env.SLACK_BOT_TOKEN,
+    channel: command.channel_id,
+    user: command.user_id,
+    blocks: blocks
+  });
+});
+
+app.action('button-action', async ({ body, ack, say }) => {
+  // Acknowledge the action
+  await ack();
+  console.log(body);
 });
 
 (async () => {

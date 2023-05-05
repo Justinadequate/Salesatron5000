@@ -1,6 +1,6 @@
 const { DateTime } = require('luxon');
 
-const DATE_TIME_REGEX = /\b(?<Month>\d{1,2})[-/](?<Day>\d{1,2})[-/]?(?<Year>\d{0,4})\b|\b(?<Month2>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[.,]?\s+(?<Day2>\d{1,2}[a-z]{0,2}),?\s+(?<Year2>\d{2,4})?\b|\b(?<Hour>1[012]|[1-9])(?!\/)(?!:(?=1(?!\s)))(?::(?<Minute>\d{2}))?\s?(?<AmPm>am|pm|AM|PM)?\b/gm;
+const DATE_TIME_REGEX = /\b(?<Month>\d{1,2})[-/](?<Day>\d{1,2})[-/]?(?<Year>\d{2,4})?\b|\b(?<Month2>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[.,]?\s+(?<Day2>\d{1,2}[a-z]{0,2}),?\s+(?<Year2>\d{2,4})?\b|\b(?<Hour>1[012]|[1-9])(?!\/)(?!:(?=1(?!\s)))(?::(?<Minute>\d{2}))?\s?(?<AmPm>am|pm|AM|PM)?\b/gmi;
 
 function extractDate(message) {
   const groomedMessage = groomMessage(message);
@@ -8,11 +8,23 @@ function extractDate(message) {
 
   if (matches.length > 0) {
     const dateTimeInfo = getDateTimeInfoFromRegex(matches);
+    
+    // look up month, if it's not a number
+    if( isNaN(dateTimeInfo.month) ) {
+      const index = monthLookup.indexOf(dateTimeInfo.month.toLowerCase().substring(0, 3));
+      if( index >= 0 ) {
+        dateTimeInfo.month = index + 1;
+      } else {
+        // current month
+        dateTimeInfo.month = DateTime.local().month;
+      }
+    }
+
     let dt = DateTime.fromObject({
       year: dateTimeInfo.year,
       month: dateTimeInfo.month,
       day: dateTimeInfo.day.replace("th", "").replace("rd", "").replace("nd", ""), 
-      hour: dateTimeInfo.hour,
+      hour: parseInt(dateTimeInfo.hour, 10) + amPmOffset[dateTimeInfo.amPm.toLowerCase()],
       minute: dateTimeInfo.minute,
     }, {zone: 'America/New_York'});
 
@@ -36,36 +48,12 @@ const getDateTimeInfoFromRegex = (matches) => {
     year: matches[0].groups.Year ?? matches[0].groups.Year2 ?? new Date().getFullYear(),
     hour: matches[1]?.groups.Hour ?? 0,
     minute: matches[1]?.groups.Minute ?? 0,
-    amPm: matches[1]?.groups.AmPm,
+    amPm: matches[1]?.groups.AmPm || 'am',
   };
 };
 
-const months = {
-  Jan: 0,
-  Feb: 1,
-  Mar: 2,
-  Apr: 3,
-  May: 4,
-  Jun: 5,
-  Jul: 6,
-  Aug: 7,
-  Sep: 8,
-  Oct: 9,
-  Nov: 10,
-  Dec: 11,
-  1: 0,
-  2: 1,
-  3: 2,
-  4: 3,
-  5: 4,
-  6: 5,
-  7: 6,
-  8: 7,
-  9: 8,
-  10: 9,
-  11: 10,
-  12: 11,
-};
+const monthLookup = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "nov", "dec"];
+
 const amPmOffset = {
   am: 0,
   pm: 12,

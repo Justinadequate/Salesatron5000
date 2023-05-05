@@ -22,19 +22,32 @@ async function listEvents(auth) {
   });
   console.log(res.data);
 
-  // const ires = await calendarApi.events.insert({
-  //   calendarId: calendarId,
-  //   requestBody: {
-  //     summary: "SALES DEMO",
-  //     description: "Yo!  A demo is happening",
-  //     start: {
-  //       dateTime: "2023-05-04T05:00:00-06:00",
-  //     },
-  //     end: {
-  //       dateTime: "2023-05-04T06:00:00-06:00",
-  //     },
-  //   },
-  // });
+  // List events
+  const res2 = await calendarApi.events.list({
+    calendarId: calendarId,
+    timeMin: new Date().toISOString(),
+    maxResults: 10,
+    singleEvents: true,
+    orderBy: "startTime",
+  });
+
+  const events = res2.data.items;
+  if (events.length) {
+    console.log("Upcoming 10 events:");
+    
+    console.log(events);
+
+    return events.map((event, i) => {
+      const start = event.start.dateTime || event.start.date;
+      console.log(`${start} - ${event.description}`);
+      return {
+        start: start,
+        description: event.description,
+      };
+    });
+  }
+
+  return [];
 }
 
 const app = new App({
@@ -63,6 +76,9 @@ async function handleScheduling(message) {
   const auth = await authorize();
   const calendarApi = google.calendar({ version: "v3", auth });
 
+  console.log('DATE', date);
+  console.log('DATE ISO', date.toISO());
+
   // TODO: Schedule event.
   const res = await calendarApi.events.insert({
     calendarId: calendarId,
@@ -83,6 +99,16 @@ async function handleScheduling(message) {
 }
 
 app.message(async ({ message, say }) => {
+  console.log(message);
+  if(message.subtype !== undefined) {
+    return;
+  }
+
+  if(message.bot_id !== undefined || message.subtype === 'bot_message') {
+    console.log("Ignoring bot message");
+    return;
+  } 
+
   try {
     const msg = await handleScheduling(message);
     if (msg !== false) {
@@ -96,21 +122,35 @@ app.message(async ({ message, say }) => {
         //thread_ts: message.thread_ts ?? message.ts,
       });
 
-      await say(`I'm on it!  I'll schedule that for you at ${msg}`);
-
       // react to message
-      /*
+      
       await app.client.reactions.add({
         token: process.env.SLACK_BOT_TOKEN,
         channel: message.channel,
         name: "meow_business",
         timestamp: message.ts,
       });
-      */
     }
   } catch (e) {
     say(`Something when wrong when making calendar. ${e}`);
-    console.log('COULDN"T Send msag', e);
+    console.log('COULDN"T Send message', e);
+  }
+});
+
+// demos command
+app.command("/demos", async ({ command, ack, say }) => {
+  // Acknowledge command request
+  
+  await ack();
+
+  const upcomingEvents = await listEvents(await authorize());
+  if (upcomingEvents.length > 0) {
+    await say("Here are the upcoming demos:");
+    upcomingEvents.forEach((event) => {
+      say(`${event.start} - ${event.description}`);
+    });
+  } else {
+    await say("There are no upcoming demos.");
   }
 });
 
@@ -119,7 +159,7 @@ app.message(async ({ message, say }) => {
   try {
     await app.start(process.env.PORT || 3000);
     const auth = await authorize();
-    listEvents(auth);
+    console.log(await listEvents(auth));
   } catch (e) {
     console.error(e);
   }
